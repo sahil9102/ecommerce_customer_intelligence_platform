@@ -1,0 +1,24 @@
+{
+  "job_name": "Product Category Name Translation: Raw to Bronze",
+  "job_id": 10006,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "product_category_name": "product_category_name",
+      "product_category_name_english": "product_category_name_english"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "sep": ","
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.product_category_name_translation",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "product_category_name_translation.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20006,
+      "job_type": "silver"
+    }
+  ]
+}

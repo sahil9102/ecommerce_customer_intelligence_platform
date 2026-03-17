@@ -1,0 +1,87 @@
+{
+    "catalog": "ecommerce",
+    "source_view": "gold.vw_customer_features",
+    "target_table": "gold.churn_predictions",
+    "primary_keys": [
+        "customer_unique_id"
+    ],
+    "job_id": "40001",
+    "parent_job_id": "2000",
+    "partition": "20260314194233971",
+    "ETL_NB": "ML/XGBoost",
+    "default_value_flag": true,
+    "target_col": "churn_label",
+    "model_type": "xgboost",
+    "experiment_path": "/Workspace/Users/sahil.prusty09@gmail.com/experiments/ecommerce_churn_prediction",
+    "test_size": 0.2,
+    "random_state": 42,
+    "tune_threshold": true,
+    "score_col": "churn_probability",
+    "label_col": "churn_label_predicted",
+    "categorical_cols": [
+        "customer_state"
+    ],
+    "feature_cols": [
+        "frequency",
+        "monetary",
+        "F_score",
+        "M_score",
+        "avg_order_value",
+        "max_order_value",
+        "avg_delivery_days",
+        "avg_delay_days",
+        "late_order_rate",
+        "late_orders",
+        "avg_review_score",
+        "low_score_reviews",
+        "reviews_with_comment",
+        "avg_pct_credit_card",
+        "avg_installments",
+        "installment_orders",
+        "freight_to_spend_ratio",
+        "total_items_purchased",
+        "avg_items_per_order",
+        "avg_categories_per_order",
+        "customer_tenure_days",
+        "active_months",
+        "avg_spend_per_month",
+        "is_repeat_customer"
+    ],
+    "fill_with_zero": [
+        "low_score_reviews",
+        "reviews_with_comment",
+        "freight_to_spend_ratio",
+        "total_items_purchased",
+        "avg_categories_per_order",
+        "avg_items_per_order",
+        "late_orders",
+        "installment_orders",
+        "avg_delay_days",
+        "is_inactive_90d"
+    ],
+    "model_params": {
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "min_child_weight": 5,
+        "gamma": 0.1,
+        "reg_alpha": 0.1,
+        "reg_lambda": 1.5,
+        "eval_metric": "logloss",
+        "random_state": 42
+    },
+    "dependent_jobs": [
+        {
+            "job_id": 20009,
+            "job_name": "Orders: Raw to Bronze",
+            "job_type": "silver"
+        },
+        {
+            "job_id": 30005,
+            "job_name": "Cutomer Order History: Silver to Gold",
+            "job_type": "gold"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+{
+  "job_name": "Orders: Raw to Bronze",
+  "job_id": 10009,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "order_id": "order_id",
+      "customer_id": "customer_id",
+      "order_status": "order_status",
+      "order_purchase_timestamp": "order_purchase_timestamp",
+      "order_approved_at": "order_approved_at",
+      "order_delivered_carrier_date": "order_delivered_carrier_date",
+      "order_delivered_customer_date": "order_delivered_customer_date",
+      "order_estimated_delivery_date": "order_estimated_delivery_date"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "sep": ","
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.orders",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "olist_orders_dataset.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20009,
+      "job_type": "silver"
+    }
+  ]
+}

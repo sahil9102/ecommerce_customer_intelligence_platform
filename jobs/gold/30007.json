@@ -1,0 +1,30 @@
+{
+  "job_name": "Product Features: Gold to Gold",
+  "job_id": 30007,
+  "parent_job_id": 1000,
+  "catalog": "ecommerce",
+  "ETL_NB": "ETL/scd_type_1",
+  "source_view": "gold.vw_product_features",
+  "primary_keys": [
+      "product_id"
+  ],
+  "target_table": "gold.product_features",
+  "default_value_flag": true,
+  "dependent_jobs": [
+    {
+      "job_id": 20009,
+      "job_name": "Orders: Bronze to Silver",
+      "job_type": "silver"
+    },
+    {
+      "job_id": 30002,
+      "job_name": "Enriched Order Items: Silver to Gold",
+      "job_type": "gold"
+    },
+    {
+      "job_id": 30004,
+      "job_name": "Enriched Reviews: Silver to Gold",
+      "job_type": "gold"
+    }
+  ]
+}

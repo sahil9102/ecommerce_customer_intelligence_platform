@@ -1,0 +1,31 @@
+{
+  "job_name": "Order Reviews: Raw to Bronze",
+  "job_id": 10008,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "review_id": "review_id",
+      "order_id": "order_id",
+      "review_score": "review_score",
+      "review_comment_title": "review_comment_title",
+      "review_comment_message": "review_comment_message",
+      "review_creation_date": "review_creation_date",
+      "review_answer_timestamp": "review_answer_timestamp"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "escape": "\"",
+      "sep": ",",
+      "multiLine": "true"
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.order_reviews",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "olist_order_reviews_dataset.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20008,
+      "job_type": "silver"
+    }
+  ]
+}

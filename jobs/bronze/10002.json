@@ -1,0 +1,27 @@
+{
+  "job_name": "Order Payments: Raw to Bronze",
+  "job_id": 10002,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "order_id": "order_id",
+      "payment_sequential": "payment_sequential",
+      "payment_type": "payment_type",
+      "payment_installments": "payment_installments",
+      "payment_value": "payment_value"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "sep": ","
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.order_payments",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "olist_order_payments_dataset.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20002,
+      "job_type": "silver"
+    }
+  ]
+}

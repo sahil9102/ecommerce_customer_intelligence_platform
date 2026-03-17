@@ -1,0 +1,16 @@
+{
+  "job_name": "Product Category Name Translation: Bronze to Silver",
+  "job_id": 20006,
+  "parent_job_id": 10006,
+    "ETL_NB": "ETL/bronze_to_silver",
+  "catalog": "ecommerce",
+  "source_view": "bronze.vw_product_category_name_translation",
+  "primary_keys": [
+      "product_category_name"
+  ],
+  "deduplication_cols": [
+      "partition"
+  ],
+  "default_value_flag": true,
+  "target_table": "silver.product_category_name_translation"
+}

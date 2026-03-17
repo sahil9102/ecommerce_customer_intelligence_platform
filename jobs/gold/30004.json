@@ -1,0 +1,21 @@
+{
+  "job_name": "Enriched Reviews: Silver to Gold",
+  "job_id": 30004,
+  "parent_job_id": 1000,
+  "catalog": "ecommerce",
+  "ETL_NB": "ETL/scd_type_1",
+  "source_view": "silver.vw_enriched_reviews",
+  "primary_keys": [
+      "order_id",
+      "review_id"
+  ],
+  "target_table": "gold.enriched_reviews",
+  "default_value_flag": true,
+  "dependent_jobs": [
+    {
+      "job_id": 20008,
+      "job_name": "Order Reviews: Bronze to Silver",
+      "job_type": "silver"
+    }
+  ]
+}

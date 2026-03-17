@@ -1,0 +1,31 @@
+{
+  "job_name": "Products: Raw to Bronze",
+  "job_id": 10007,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "product_id": "product_id",
+      "product_category_name": "product_category_name",
+      "product_name_lenght": "product_name_length",
+      "product_description_lenght": "product_description_length",
+      "product_photos_qty": "product_photos_qty",
+      "product_weight_g": "product_weight_g",
+      "product_length_cm": "product_length_cm",
+      "product_height_cm": "product_height_cm",
+      "product_width_cm": "product_width_cm"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "sep": ","
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.products",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "olist_products_dataset.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20007,
+      "job_type": "silver"
+    }
+  ]
+}

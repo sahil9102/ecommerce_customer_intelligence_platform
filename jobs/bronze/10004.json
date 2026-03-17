@@ -1,0 +1,27 @@
+{
+  "job_name": "Geolocation: Raw to Bronze",
+  "job_id": 10004,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "geolocation_zip_code_prefix": "geolocation_zip_code_prefix",
+      "geolocation_lat": "geolocation_lat",
+      "geolocation_lng": "geolocation_lng",
+      "geolocation_city": "geolocation_city",
+      "geolocation_state": "geolocation_state"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "sep": ","
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.geolocation",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "olist_geolocation_dataset.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20004,
+      "job_type": "silver"
+    }
+  ]
+}

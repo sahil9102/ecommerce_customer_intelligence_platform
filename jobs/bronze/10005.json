@@ -1,0 +1,27 @@
+{
+  "job_name": "Customers: Raw to Bronze",
+  "job_id": 10005,
+  "ETL_NB": "ETL/raw_to_bronze",
+  "raw_to_bronze_col_map": {
+      "customer_id": "customer_id",
+      "customer_unique_id": "customer_unique_id",
+      "customer_zip_code_prefix": "customer_zip_code_prefix",
+      "customer_city": "customer_city",
+      "customer_state": "customer_state"
+  },
+  "csv_options": {
+      "header": "true",
+      "quote": "\"",
+      "sep": ","
+  },
+  "catalog": "ecommerce",
+  "target_table": "bronze.customers",
+  "location": "/Volumes/ecommerce/bronze/data_file_container",
+  "file_prefix": "olist_customers_dataset.csv",
+  "trigger_jobs": [
+    {
+      "job_id": 20005,
+      "job_type": "silver"
+    }
+  ]
+}

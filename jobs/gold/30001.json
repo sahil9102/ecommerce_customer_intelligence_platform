@@ -1,0 +1,30 @@
+{
+  "job_name": "Enriched Orders: Silver to Gold",
+  "job_id": 30001,
+  "parent_job_id": 1000,
+  "catalog": "ecommerce",
+  "ETL_NB": "ETL/scd_type_1",
+  "source_view": "silver.vw_orders_enriched",
+  "primary_keys": [
+      "order_id"
+  ],
+  "target_table": "gold.orders_enriched",
+  "default_value_flag": true,
+  "dependent_jobs": [
+    {
+      "job_id": 20003,
+      "job_name": "Order Items: Bronze to Silver",
+      "job_type": "silver"
+    },
+    {
+      "job_id": 20005,
+      "job_name": "Customers: Bronze to Silver",
+      "job_type": "silver"
+    },
+    {
+      "job_id": 20009,
+      "job_name": "Orders: Bronze to Silver",
+      "job_type": "silver"
+    }
+  ]
+}

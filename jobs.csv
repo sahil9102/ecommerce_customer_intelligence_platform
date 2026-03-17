@@ -1,0 +1,33 @@
+folder_name,job_id,job_name,source_view,target_table,file_path
+bronze,10005,Customers: Raw to Bronze,,bronze.customers,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10005.json
+bronze,10009,Orders: Raw to Bronze,,bronze.orders,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10009.json
+bronze,10004,Geolocation: Raw to Bronze,,bronze.geolocation,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10004.json
+bronze,10001,Sellers: Raw to Bronze,,bronze.sellers,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10001.json
+bronze,10003,Order Items: Raw to Bronze,,bronze.order_items,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10003.json
+bronze,10007,Products: Raw to Bronze,,bronze.products,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10007.json
+bronze,10002,Order Payments: Raw to Bronze,,bronze.order_payments,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10002.json
+bronze,10006,Product Category Name Translation: Raw to Bronze,,bronze.product_category_name_translation,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10006.json
+bronze,10008,Order Reviews: Raw to Bronze,,bronze.order_reviews,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/bronze/10008.json
+gold,30004,Enriched Reviews: Silver to Gold,silver.vw_enriched_reviews,gold.enriched_reviews,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30004.json
+gold,30007,Product Features: Gold to Gold,gold.vw_product_features,gold.product_features,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30007.json
+gold,30009,Cohort Analysis: Gold to Gold,gold.vw_cohort_analysis,gold.cohort_analysis,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30009.json
+gold,30006,Cutomer Features: Gold to Gold,gold.vw_customer_features,gold.customer_features,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30006.json
+gold,30001,Enriched Orders: Silver to Gold,silver.vw_orders_enriched,gold.orders_enriched,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30001.json
+gold,30005,Cutomer Order History: Silver to Gold,silver.vw_customer_order_history,gold.customer_order_history,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30005.json
+gold,30008,Business KPI: Gold to Gold,gold.vw_business_kpis,gold.business_kpis,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30008.json
+gold,30002,Enriched Order Items: Silver to Gold,silver.vw_order_items_enriched,gold.order_items_enriched,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30002.json
+gold,30003,Aggrgated Payments: Silver to Gold,silver.vw_payments_agg,gold.payments_agg,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/gold/30003.json
+ml,40001,,gold.vw_customer_features,gold.churn_predictions,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/ml/50001.json
+ml,50004,,,gold.clv_predictions,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/ml/50004.json
+ml,50002,,,gold.churn_predictions,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/ml/50002.json
+ml,50002,,gold.vw_customer_features,gold.clv_predictions,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/ml/50003.json
+ml,50005,,gold.vw_customer_features,gold.customer_segments,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/ml/50005.json
+silver,20006,Product Category Name Translation: Bronze to Silver,bronze.vw_product_category_name_translation,silver.product_category_name_translation,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20006.json
+silver,20009,Orders: Bronze to Silver,bronze.vw_orders,silver.orders,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20009.json
+silver,20003,Order Items: Bronze to Silver,bronze.vw_order_items,silver.order_items,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20003.json
+silver,20002,Order Payments: Bronze to Silver,bronze.vw_order_payments,silver.order_payments,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20002.json
+silver,20001,Sellers: Bronze to Silver,bronze.vw_sellers,silver.sellers,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20001.json
+silver,20007,Products: Bronze to Silver,bronze.vw_products,silver.products,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20007.json
+silver,20008,Order Reviews: Bronze to Silver,bronze.vw_order_reviews,silver.order_reviews,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20008.json
+silver,20004,Geolocation: Bronze to Silver,bronze.vw_geolocation,silver.geolocation,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20004.json
+silver,20005,Customers: Bronze to Silver,bronze.vw_customers,silver.customers,/Workspace/Users/sahil.prusty09@gmail.com/ecommerce_customer_intelligence_platform/jobs/silver/20005.json

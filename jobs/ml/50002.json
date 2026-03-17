@@ -1,0 +1,47 @@
+{
+    "catalog": "ecommerce",
+    "model_name": "ecommerce_churn_label_xgboost_20260314194233971",
+    "target_table": "gold.churn_predictions",
+    "registry_table": "gold.model_registry",
+    "primary_keys": [
+        "customer_unique_id"
+    ],
+    "job_id": "50002",
+    "parent_job_id": "2000",
+    "partition": "20260315105118134",
+    "ETL_NB": "ML/batch_inference",
+    "prediction_type": "classification",
+    "passthrough_cols": [
+        "customer_state",
+        "customer_city"
+    ],
+    "fill_with_zero": [
+        "low_score_reviews",
+        "reviews_with_comment",
+        "freight_to_spend_ratio",
+        "total_items_purchased",
+        "avg_categories_per_order",
+        "avg_items_per_order",
+        "late_orders",
+        "installment_orders",
+        "avg_delay_days",
+        "is_inactive_90d"
+    ],
+    "high_offset": 0.25,
+    "tier_labels": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+    },
+    "log_transform_target": false,
+    "clv_tier_cutoffs": {},
+    "clv_tier_labels": {},
+    "inference_experiment_path": "/Workspace/Users/sahil.prusty09@gmail.com/experiments/ecommerce_inference",
+    "dependent_jobs": [
+        {
+            "job_id": 50001,
+            "job_name": "Ecommerce Churn Prediction",
+            "job_type": "ml"
+        }
+    ]
+}

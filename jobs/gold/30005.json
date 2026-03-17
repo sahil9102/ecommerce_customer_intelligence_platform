@@ -1,0 +1,40 @@
+{
+  "job_name": "Cutomer Order History: Silver to Gold",
+  "job_id": 30005,
+  "parent_job_id": 1000,
+  "catalog": "ecommerce",
+  "ETL_NB": "ETL/scd_type_1",
+  "source_view": "silver.vw_customer_order_history",
+  "primary_keys": [
+      "customer_unique_id"
+  ],
+  "target_table": "gold.customer_order_history",
+  "default_value_flag": true,
+  "dependent_jobs": [
+    {
+      "job_id": 20005,
+      "job_name": "Customers: Bronze to Silver",
+      "job_type": "silver"
+    },
+    {
+      "job_id": 30001,
+      "job_name": "Enriched Orders: Silver to Gold",
+      "job_type": "gold"
+    },
+    {
+      "job_id": 30002,
+      "job_name": "Enriched Order Items: Silver to Gold",
+      "job_type": "gold"
+    },
+    {
+      "job_id": 30003,
+      "job_name": "Aggrgated Payments: Silver to Gold",
+      "job_type": "gold"
+    },
+    {
+      "job_id": 30004,
+      "job_name": "Enriched Reviews: Silver to Gold",
+      "job_type": "gold"
+    }
+  ]
+}

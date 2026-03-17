@@ -1,0 +1,17 @@
+{
+  "job_name": "Order Reviews: Bronze to Silver",
+  "job_id": 20008,
+  "parent_job_id": 10008,
+    "ETL_NB": "ETL/bronze_to_silver",
+  "catalog": "ecommerce",
+  "source_view": "bronze.vw_order_reviews",
+  "primary_keys": [
+      "review_id",
+      "order_id"
+  ],
+  "deduplication_cols": [
+      "partition"
+  ],
+  "default_value_flag": true,
+  "target_table": "silver.order_reviews"
+}

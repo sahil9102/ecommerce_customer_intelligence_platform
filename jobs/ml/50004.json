@@ -1,0 +1,50 @@
+{
+    "catalog": "ecommerce",
+    "model_name": "ecommerce_clv_next_90d_estimate_regressor",
+    "target_table": "gold.clv_predictions",
+    "registry_table": "gold.model_registry",
+    "primary_keys": [
+        "customer_unique_id"
+    ],
+    "job_id": "50004",
+    "parent_job_id": "2000",
+    "ETL_NB": "ML/batch_inference.py",
+    "partition": "20260315105118134",
+    "prediction_type": "regression",
+    "passthrough_cols": [
+        "customer_state",
+        "customer_city"
+    ],
+    "fill_with_zero": [
+        "low_score_reviews",
+        "reviews_with_comment",
+        "freight_to_spend_ratio",
+        "total_items_purchased",
+        "avg_categories_per_order",
+        "avg_items_per_order",
+        "late_orders",
+        "installment_orders",
+        "avg_delay_days",
+        "is_inactive_90d"
+    ],
+    "high_offset": 0.0,
+    "tier_labels": {},
+    "log_transform_target": true,
+    "clv_tier_cutoffs": {
+        "high": 50.0,
+        "medium": 15.0
+    },
+    "clv_tier_labels": {
+        "high": "High Value",
+        "medium": "Medium Value",
+        "low": "Low Value"
+    },
+    "inference_experiment_path": "/Workspace/Users/sahil.prusty09@gmail.com/experiments/ecommerce_inference",
+    "dependent_jobs": [
+        {
+            "job_id": 50003,
+            "job_name": "CLV Prediction",
+            "job_type": "ml"
+        }
+    ]
+}

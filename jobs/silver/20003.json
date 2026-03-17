@@ -1,0 +1,17 @@
+{
+  "job_name": "Order Items: Bronze to Silver",
+  "job_id": 20003,
+  "parent_job_id": 10003,
+    "ETL_NB": "ETL/bronze_to_silver",
+  "catalog": "ecommerce",
+  "source_view": "bronze.vw_order_items",
+  "primary_keys": [
+      "order_id",
+      "order_item_id"
+  ],
+  "deduplication_cols": [
+      "partition"
+  ],
+  "default_value_flag": true,
+  "target_table": "silver.order_items"
+}

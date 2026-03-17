@@ -1,0 +1,26 @@
+{
+  "job_name": "Cohort Analysis: Gold to Gold",
+  "job_id": 30009,
+  "parent_job_id": 1000,
+  "catalog": "ecommerce",
+  "ETL_NB": "ETL/scd_type_1",
+  "source_view": "gold.vw_cohort_analysis",
+  "primary_keys": [
+      "cohort_month",
+      "activity_month"
+  ],
+  "target_table": "gold.cohort_analysis",
+  "default_value_flag": true,
+  "dependent_jobs": [
+    {
+      "job_id": 20005,
+      "job_name": "Customers: Bronze to Silver",
+      "job_type": "silver"
+    },
+    {
+      "job_id": 20009,
+      "job_name": "Orders: Bronze to Silver",
+      "job_type": "silver"
+    }
+  ]
+}

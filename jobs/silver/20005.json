@@ -1,0 +1,16 @@
+{
+  "job_name": "Customers: Bronze to Silver",
+  "job_id": 20005,
+  "parent_job_id": 10005,
+    "ETL_NB": "ETL/bronze_to_silver",
+  "catalog": "ecommerce",
+  "source_view": "bronze.vw_customers",
+  "primary_keys": [
+      "customer_id"
+  ],
+  "deduplication_cols": [
+      "partition"
+  ],
+  "default_value_flag": true,
+  "target_table": "silver.customers"
+}

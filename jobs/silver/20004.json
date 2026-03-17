@@ -1,0 +1,20 @@
+{
+  "job_name": "Geolocation: Bronze to Silver",
+  "job_id": 20004,
+  "parent_job_id": 10004,
+    "ETL_NB": "ETL/bronze_to_silver",
+  "catalog": "ecommerce",
+  "source_view": "bronze.vw_geolocation",
+  "primary_keys": [
+    "geolocation_zip_code_prefix",
+    "geolocation_lat",
+    "geolocation_lng",
+    "geolocation_city",
+    "geolocation_state"
+  ],
+  "deduplication_cols": [
+      "partition"
+  ],
+  "default_value_flag": true,
+  "target_table": "silver.geolocation"
+}

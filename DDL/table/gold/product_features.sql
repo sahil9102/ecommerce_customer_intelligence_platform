@@ -1,0 +1,40 @@
+-- Databricks notebook source
+CREATE TABLE ecommerce.gold.product_features (
+  product_id STRING,
+  category_english STRING,
+  product_weight_g INT,
+  product_volume_cm3 INT,
+  total_orders BIGINT,
+  total_units_sold BIGINT,
+  total_revenue DECIMAL(38,18),
+  avg_price DECIMAL(38,22),
+  min_price DECIMAL(38,18),
+  max_price DECIMAL(38,18),
+  price_stddev DOUBLE,
+  num_sellers BIGINT,
+  avg_freight DECIMAL(38,22),
+  avg_freight_pct DECIMAL(38,22),
+  avg_review_score DECIMAL(38,18),
+  total_reviews BIGINT,
+  low_score_count BIGINT,
+  reviews_with_comment BIGINT,
+  low_score_rate DECIMAL(38,18),
+  category_avg_revenue DECIMAL(38,22),
+  category_total_units BIGINT,
+  revenue_vs_category_avg DECIMAL(38,5),
+  is_high_value_product INT,
+  sales_velocity_tier STRING,
+  creation_timestamp TIMESTAMP,
+  updation_timestamp TIMESTAMP,
+  job_run STRING,
+  parent_job_run STRING)
+USING delta
+COLLATION 'UTF8_BINARY'
+TBLPROPERTIES (
+  'delta.enableDeletionVectors' = 'true',
+  'delta.feature.appendOnly' = 'supported',
+  'delta.feature.deletionVectors' = 'supported',
+  'delta.feature.invariants' = 'supported',
+  'delta.minReaderVersion' = '3',
+  'delta.minWriterVersion' = '7',
+  'delta.parquet.compression.codec' = 'zstd')

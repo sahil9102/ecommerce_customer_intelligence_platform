@@ -1,0 +1,25 @@
+{
+  "job_name": "Cutomer Features: Gold to Gold",
+  "job_id": 30006,
+  "parent_job_id": 1000,
+  "catalog": "ecommerce",
+  "ETL_NB": "ETL/scd_type_1",
+  "source_view": "gold.vw_customer_features",
+  "primary_keys": [
+      "customer_unique_id"
+  ],
+  "target_table": "gold.customer_features",
+  "default_value_flag": true,
+  "dependent_jobs": [
+    {
+      "job_id": 20009,
+      "job_name": "Orders: Bronze to Silver",
+      "job_type": "silver"
+    },
+    {
+      "job_id": 30005,
+      "job_name": "Cutomer Order History: Silver to Gold",
+      "job_type": "gold"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+    "catalog": "ecommerce",
+    "source_view": "gold.vw_customer_features",
+    "target_table": "gold.customer_segments",
+    "primary_keys": [
+        "customer_unique_id"
+    ],
+    "job_id": "50005",
+    "parent_job_id": "2000",
+    "partition": "20260315175024124",
+    "default_value_flag": true,
+    "ETL_NB": "ML/K_means_clusterring",
+    "model_type": "kmeans",
+    "experiment_path": "/Workspace/Users/sahil.prusty09@gmail.com/experiments/ecommerce_segmentation",
+    "k_min": 3,
+    "k_max": 10,
+    "k_final": 3,
+    "random_state": 42,
+    "categorical_cols": [],
+    "passthrough_cols": [
+        "customer_state",
+        "customer_city"
+    ],
+    "fill_with_zero": [
+        "low_score_reviews",
+        "reviews_with_comment",
+        "freight_to_spend_ratio",
+        "total_items_purchased",
+        "avg_categories_per_order",
+        "avg_items_per_order",
+        "late_orders",
+        "installment_orders",
+        "avg_delay_days"
+    ],
+    "segment_names": {
+        "0": "type_1",
+        "1": "type_2",
+        "2": "type_3"
+    },
+    "kmeans_params": {
+        "init": "k-means++",
+        "n_init": 10,
+        "max_iter": 300,
+        "tol": 0.0001,
+        "random_state": 42
+    },
+    "feature_cols": [
+        "R_score",
+        "F_score",
+        "M_score",
+        "RFM_score",
+        "recency_days",
+        "frequency",
+        "monetary",
+        "avg_order_value",
+        "late_order_rate",
+        "avg_review_score",
+        "low_score_reviews",
+        "customer_tenure_days",
+        "active_months",
+        "avg_spend_per_month",
+        "is_repeat_customer",
+        "avg_delivery_days",
+        "total_items_purchased"
+    ],
+    "dependent_jobs": [
+        {
+            "job_id": 20009,
+            "job_name": "Orders: Raw to Bronze",
+            "job_type": "silver"
+        },
+        {
+            "job_id": 30005,
+            "job_name": "Cutomer Order History: Silver to Gold",
+            "job_type": "gold"
+        }
+    ]
+}

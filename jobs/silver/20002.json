@@ -1,0 +1,17 @@
+{
+  "job_name": "Order Payments: Bronze to Silver",
+  "job_id": 20002,
+  "parent_job_id": 10002,
+    "ETL_NB": "ETL/bronze_to_silver",
+  "catalog": "ecommerce",
+  "source_view": "bronze.vw_order_payments",
+  "primary_keys": [
+      "order_id",
+      "payment_sequential"
+  ],
+  "deduplication_cols": [
+      "partition"
+  ],
+  "default_value_flag": true,
+  "target_table": "silver.order_payments"
+}
