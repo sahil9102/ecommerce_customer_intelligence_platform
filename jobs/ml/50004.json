@@ -8,7 +8,6 @@
     ],
     "job_id": "50004",
     "parent_job_id": "2000",
-    "ETL_NB": "ML/batch_inference.py",
     "partition": "20260315105118134",
     "prediction_type": "regression",
     "passthrough_cols": [
@@ -35,9 +34,9 @@
         "medium": 15.0
     },
     "clv_tier_labels": {
-        "high": "High Value",
-        "medium": "Medium Value",
-        "low": "Low Value"
+        "high": "HighValue",
+        "medium": "MediumValue",
+        "low": "LowValue"
     },
     "inference_experiment_path": "/Workspace/Users/sahil.prusty09@gmail.com/experiments/ecommerce_inference",
     "dependent_jobs": [
