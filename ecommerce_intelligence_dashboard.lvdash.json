@@ -1,0 +1,2110 @@
+{
+  "datasets": [
+    {
+      "name": "ds_churn_tier_summary",
+      "displayName": "Churn Risk Tier Summary",
+      "queryLines": [
+        "SELECT\n",
+        "    risk_tier,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 1) AS pct_of_total,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_prob,\n",
+        "    ROUND(SUM(predicted_clv_90d), 2) AS total_clv_at_stake,\n",
+        "    ROUND(SUM(revenue_at_risk_90d), 2) AS total_revenue_at_risk\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE churn_prediction_date IS NOT NULL\n",
+        "GROUP BY risk_tier\n",
+        "ORDER BY CASE risk_tier WHEN 'High' THEN 1 WHEN 'Medium' THEN 2 WHEN 'Low' THEN 3 END"
+      ]
+    },
+    {
+      "name": "ds_churn_prob_dist",
+      "displayName": "Churn Probability Distribution",
+      "queryLines": [
+        "SELECT\n",
+        "    CONCAT(CAST(FLOOR(churn_probability * 10) * 10 AS STRING), '-', CAST(FLOOR(churn_probability * 10) * 10 + 10 AS STRING), '%') AS probability_bucket,\n",
+        "    FLOOR(churn_probability * 10) * 10 AS bucket_order,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_clv_in_bucket\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE churn_probability IS NOT NULL\n",
+        "GROUP BY FLOOR(churn_probability * 10) * 10\n",
+        "ORDER BY bucket_order"
+      ]
+    },
+    {
+      "name": "ds_churn_by_state",
+      "displayName": "High Risk Customers by State",
+      "queryLines": [
+        "SELECT\n",
+        "    customer_state,\n",
+        "    COUNT(*) AS total_customers,\n",
+        "    SUM(CASE WHEN risk_tier = 'High' THEN 1 ELSE 0 END) AS high_risk_customers,\n",
+        "    ROUND(SUM(CASE WHEN risk_tier = 'High' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS high_risk_pct,\n",
+        "    ROUND(SUM(CASE WHEN risk_tier = 'High' THEN revenue_at_risk_90d ELSE 0 END), 2) AS revenue_at_risk_brl\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE customer_state IS NOT NULL\n",
+        "GROUP BY customer_state\n",
+        "ORDER BY high_risk_customers DESC\n",
+        "LIMIT 15"
+      ]
+    },
+    {
+      "name": "ds_top_risk_customers",
+      "displayName": "Top High Risk Customers",
+      "queryLines": [
+        "SELECT\n",
+        "    customer_unique_id,\n",
+        "    customer_state,\n",
+        "    ROUND(churn_probability, 3) AS churn_probability,\n",
+        "    risk_tier,\n",
+        "    ROUND(predicted_clv_90d, 2) AS predicted_clv_90d,\n",
+        "    ROUND(revenue_at_risk_90d, 2) AS revenue_at_risk,\n",
+        "    segment_name,\n",
+        "    ROUND(monetary, 2) AS historical_spend,\n",
+        "    frequency AS total_orders,\n",
+        "    churn_prediction_date\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE risk_tier = 'High'\n",
+        "ORDER BY revenue_at_risk_90d DESC\n",
+        "LIMIT 20"
+      ]
+    },
+    {
+      "name": "ds_churn_by_rfm",
+      "displayName": "Churn Rate by RFM Segment",
+      "queryLines": [
+        "SELECT\n",
+        "    rfm_segment,\n",
+        "    COUNT(*) AS total_customers,\n",
+        "    SUM(churn_label_predicted) AS predicted_churned,\n",
+        "    ROUND(SUM(churn_label_predicted) * 100.0 / COUNT(*), 1) AS churn_rate_pct,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_prob,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_clv\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE rfm_segment IS NOT NULL\n",
+        "GROUP BY rfm_segment\n",
+        "ORDER BY churn_rate_pct DESC"
+      ]
+    },
+    {
+      "name": "ds_clv_tier_summary",
+      "displayName": "CLV Tier Summary",
+      "queryLines": [
+        "SELECT\n",
+        "    clv_tier,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 1) AS pct_of_total,\n",
+        "    ROUND(SUM(predicted_clv_90d), 2) AS total_predicted_clv,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_predicted_clv,\n",
+        "    ROUND(MIN(predicted_clv_90d), 2) AS min_clv,\n",
+        "    ROUND(MAX(predicted_clv_90d), 2) AS max_clv\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE clv_tier IS NOT NULL\n",
+        "GROUP BY clv_tier\n",
+        "ORDER BY avg_predicted_clv DESC"
+      ]
+    },
+    {
+      "name": "ds_clv_by_state",
+      "displayName": "CLV by State",
+      "queryLines": [
+        "SELECT\n",
+        "    customer_state,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(SUM(predicted_clv_90d), 2) AS total_predicted_clv,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_predicted_clv,\n",
+        "    ROUND(SUM(CASE WHEN clv_tier = 'High Value' THEN predicted_clv_90d ELSE 0 END), 2) AS high_value_clv,\n",
+        "    SUM(CASE WHEN clv_tier = 'High Value' THEN 1 ELSE 0 END) AS high_value_customers\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE customer_state IS NOT NULL\n",
+        "GROUP BY customer_state\n",
+        "ORDER BY total_predicted_clv DESC\n",
+        "LIMIT 15"
+      ]
+    },
+    {
+      "name": "ds_clv_churn_matrix",
+      "displayName": "CLV vs Churn Risk Matrix",
+      "queryLines": [
+        "SELECT\n",
+        "    clv_tier,\n",
+        "    risk_tier,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(SUM(predicted_clv_90d), 2) AS total_clv,\n",
+        "    ROUND(SUM(revenue_at_risk_90d), 2) AS revenue_at_risk,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_prob\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE clv_tier IS NOT NULL AND risk_tier IS NOT NULL\n",
+        "GROUP BY clv_tier, risk_tier\n",
+        "ORDER BY clv_tier, risk_tier"
+      ]
+    },
+    {
+      "name": "ds_top_clv_customers",
+      "displayName": "Top CLV Customers",
+      "queryLines": [
+        "SELECT\n",
+        "    customer_unique_id,\n",
+        "    customer_state,\n",
+        "    ROUND(predicted_clv_90d, 2) AS predicted_clv_90d,\n",
+        "    clv_tier,\n",
+        "    ROUND(monetary, 2) AS historical_spend,\n",
+        "    frequency AS total_orders,\n",
+        "    ROUND(churn_probability, 3) AS churn_probability,\n",
+        "    risk_tier,\n",
+        "    segment_name,\n",
+        "    ROUND(revenue_at_risk_90d, 2) AS revenue_at_risk\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "ORDER BY predicted_clv_90d DESC\n",
+        "LIMIT 20"
+      ]
+    },
+    {
+      "name": "ds_segment_overview",
+      "displayName": "Segment Overview",
+      "queryLines": [
+        "SELECT\n",
+        "    segment_name,\n",
+        "    cluster_id,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 1) AS pct_of_total,\n",
+        "    ROUND(AVG(monetary), 2) AS avg_historical_spend,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_predicted_clv,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_prob,\n",
+        "    ROUND(AVG(frequency), 2) AS avg_orders,\n",
+        "    ROUND(AVG(avg_review_score), 2) AS avg_review_score,\n",
+        "    ROUND(AVG(recency_days), 0) AS avg_recency_days\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE segment_name IS NOT NULL\n",
+        "GROUP BY segment_name, cluster_id\n",
+        "ORDER BY cluster_id"
+      ]
+    },
+    {
+      "name": "ds_segment_state_heatmap",
+      "displayName": "Segment by State",
+      "queryLines": [
+        "SELECT\n",
+        "    customer_state,\n",
+        "    segment_name,\n",
+        "    COUNT(*) AS customer_count\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE customer_state IS NOT NULL AND segment_name IS NOT NULL\n",
+        "GROUP BY customer_state, segment_name\n",
+        "ORDER BY customer_state, segment_name"
+      ]
+    },
+    {
+      "name": "ds_segment_feature_radar",
+      "displayName": "Segment Feature Profile",
+      "queryLines": [
+        "SELECT\n",
+        "    segment_name,\n",
+        "    ROUND(AVG(R_score), 2) AS avg_recency_score,\n",
+        "    ROUND(AVG(F_score), 2) AS avg_frequency_score,\n",
+        "    ROUND(AVG(M_score), 2) AS avg_monetary_score,\n",
+        "    ROUND(AVG(avg_review_score), 2) AS avg_review_score,\n",
+        "    ROUND(AVG(late_order_rate) * 100, 2) AS late_order_rate_pct,\n",
+        "    ROUND(AVG(avg_order_value), 2) AS avg_order_value,\n",
+        "    ROUND(AVG(customer_tenure_days), 0) AS avg_tenure_days,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_probability,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_predicted_clv\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE segment_name IS NOT NULL\n",
+        "GROUP BY segment_name\n",
+        "ORDER BY segment_name"
+      ]
+    },
+    {
+      "name": "ds_segment_clv_cross",
+      "displayName": "Segment x CLV Tier",
+      "queryLines": [
+        "SELECT\n",
+        "    segment_name,\n",
+        "    clv_tier,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(SUM(predicted_clv_90d), 2) AS total_clv\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE segment_name IS NOT NULL AND clv_tier IS NOT NULL\n",
+        "GROUP BY segment_name, clv_tier\n",
+        "ORDER BY segment_name, clv_tier"
+      ]
+    },
+    {
+      "name": "ds_monthly_revenue",
+      "displayName": "Monthly Revenue Trend",
+      "queryLines": [
+        "WITH monthly AS (\n",
+        "    SELECT\n",
+        "        DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM') AS month,\n",
+        "        COUNT(DISTINCT o.order_id) AS total_orders,\n",
+        "        COUNT(DISTINCT c.customer_unique_id) AS active_customers,\n",
+        "        ROUND(SUM(p.total_payment_value), 2) AS total_revenue,\n",
+        "        ROUND(AVG(p.total_payment_value), 2) AS avg_order_value,\n",
+        "        SUM(o.is_late) AS late_orders,\n",
+        "        ROUND(AVG(o.actual_delivery_days), 1) AS avg_delivery_days\n",
+        "    FROM ecommerce.gold.orders_enriched o\n",
+        "    JOIN ecommerce.silver.vw_cln_ltst_customers c ON o.customer_id = c.customer_id\n",
+        "    LEFT JOIN ecommerce.silver.vw_payments_agg p ON o.order_id = p.order_id\n",
+        "    WHERE DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM') NOT IN ('2016-09','2016-12','2018-09','2018-10')\n",
+        "    GROUP BY DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM')\n",
+        ")\n",
+        "SELECT\n",
+        "    month,\n",
+        "    total_orders,\n",
+        "    active_customers,\n",
+        "    total_revenue,\n",
+        "    avg_order_value,\n",
+        "    late_orders,\n",
+        "    avg_delivery_days,\n",
+        "    ROUND((total_revenue - LAG(total_revenue) OVER (ORDER BY month)) / NULLIF(LAG(total_revenue) OVER (ORDER BY month), 0) * 100, 1) AS revenue_mom_growth_pct,\n",
+        "    ROUND(late_orders * 100.0 / NULLIF(total_orders, 0), 2) AS late_delivery_rate_pct\n",
+        "FROM monthly\n",
+        "ORDER BY month"
+      ]
+    },
+    {
+      "name": "ds_review_trend",
+      "displayName": "Review Score Trend",
+      "queryLines": [
+        "SELECT\n",
+        "    DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM') AS month,\n",
+        "    ROUND(AVG(r.review_score), 3) AS avg_review_score,\n",
+        "    COUNT(r.review_id) AS total_reviews,\n",
+        "    SUM(r.is_low_score) AS low_score_count,\n",
+        "    ROUND(SUM(r.is_low_score) * 100.0 / NULLIF(COUNT(r.review_id), 0), 1) AS low_score_rate_pct,\n",
+        "    SUM(CASE WHEN r.review_score = 5 THEN 1 ELSE 0 END) AS five_star_count,\n",
+        "    SUM(CASE WHEN r.review_score = 1 THEN 1 ELSE 0 END) AS one_star_count\n",
+        "FROM ecommerce.silver.vw_cln_ltst_orders o\n",
+        "LEFT JOIN ecommerce.gold.enriched_reviews r ON o.order_id = r.order_id\n",
+        "WHERE DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM') NOT IN ('2016-09','2016-12','2018-09','2018-10')\n",
+        "GROUP BY DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM')\n",
+        "ORDER BY month"
+      ]
+    },
+    {
+      "name": "ds_late_by_state",
+      "displayName": "Late Delivery by Seller State",
+      "queryLines": [
+        "SELECT\n",
+        "    i.seller_state,\n",
+        "    COUNT(DISTINCT o.order_id) AS total_orders,\n",
+        "    SUM(o.is_late) AS late_orders,\n",
+        "    ROUND(SUM(o.is_late) * 100.0 / NULLIF(COUNT(DISTINCT o.order_id), 0), 2) AS late_rate_pct,\n",
+        "    ROUND(AVG(o.actual_delivery_days), 1) AS avg_delivery_days,\n",
+        "    ROUND(AVG(o.delivery_delay_days), 1) AS avg_delay_days\n",
+        "FROM ecommerce.gold.orders_enriched o\n",
+        "LEFT JOIN ecommerce.silver.vw_order_items_enriched i ON o.order_id = i.order_id\n",
+        "WHERE i.seller_state IS NOT NULL AND o.order_status = 'delivered'\n",
+        "GROUP BY i.seller_state\n",
+        "ORDER BY late_rate_pct DESC"
+      ]
+    },
+    {
+      "name": "ds_payment_mix",
+      "displayName": "Payment Method Mix",
+      "queryLines": [
+        "SELECT\n",
+        "    DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM') AS month,\n",
+        "    ROUND(SUM(p.credit_card_value), 2) AS credit_card_revenue,\n",
+        "    ROUND(SUM(p.boleto_value), 2) AS boleto_revenue,\n",
+        "    ROUND(SUM(p.voucher_value), 2) AS voucher_revenue,\n",
+        "    ROUND(SUM(p.debit_card_value), 2) AS debit_card_revenue,\n",
+        "    ROUND(SUM(p.total_payment_value), 2) AS total_revenue,\n",
+        "    ROUND(SUM(p.credit_card_value) * 100.0 / NULLIF(SUM(p.total_payment_value), 0), 1) AS credit_card_pct\n",
+        "FROM ecommerce.silver.vw_cln_ltst_orders o\n",
+        "LEFT JOIN ecommerce.silver.vw_payments_agg p ON o.order_id = p.order_id\n",
+        "WHERE DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM') NOT IN ('2016-09','2016-12','2018-09','2018-10')\n",
+        "GROUP BY DATE_FORMAT(o.order_purchase_timestamp, 'yyyy-MM')\n",
+        "ORDER BY month"
+      ]
+    },
+    {
+      "name": "ds_c360_kpis",
+      "displayName": "Customer 360 KPIs",
+      "queryLines": [
+        "SELECT\n",
+        "    COUNT(DISTINCT customer_unique_id) AS total_customers,\n",
+        "    SUM(CASE WHEN risk_tier = 'High' THEN 1 ELSE 0 END) AS high_churn_risk,\n",
+        "    SUM(CASE WHEN risk_tier = 'Medium' THEN 1 ELSE 0 END) AS medium_churn_risk,\n",
+        "    SUM(CASE WHEN clv_tier = 'HighValue' THEN 1 ELSE 0 END) AS high_value_customers,\n",
+        "    ROUND(SUM(predicted_clv_90d), 0) AS total_predicted_clv_90d,\n",
+        "    ROUND(SUM(revenue_at_risk_90d), 0) AS total_revenue_at_risk,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_probability,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_predicted_clv,\n",
+        "    COUNT(DISTINCT segment_name) AS active_segments\n",
+        "FROM ecommerce.gold.vw_customer_360"
+      ]
+    },
+    {
+      "name": "ds_action_cohorts",
+      "displayName": "Actionable Priority Cohorts",
+      "queryLines": [
+        "SELECT\n",
+        "    CASE\n",
+        "        WHEN risk_tier = 'High'   AND clv_tier = 'High Value'   THEN 'URGENT - Retain Now'\n",
+        "        WHEN risk_tier = 'High'   AND clv_tier = 'Medium Value' THEN 'High Priority - Win Back'\n",
+        "        WHEN risk_tier = 'Medium' AND clv_tier = 'High Value'   THEN 'Monitor - Growing Risk'\n",
+        "        WHEN risk_tier = 'Low'    AND clv_tier = 'High Value'   THEN 'Nurture - VIP Program'\n",
+        "        WHEN risk_tier = 'High'   AND clv_tier = 'Low Value'    THEN 'Low Priority - Cost Check'\n",
+        "        ELSE 'Standard'\n",
+        "    END AS action_priority,\n",
+        "    COUNT(*) AS customer_count,\n",
+        "    ROUND(SUM(predicted_clv_90d), 2) AS total_clv_at_stake,\n",
+        "    ROUND(SUM(revenue_at_risk_90d), 2) AS total_revenue_at_risk,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_prob,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_clv\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE risk_tier IS NOT NULL AND clv_tier IS NOT NULL\n",
+        "GROUP BY 1\n",
+        "ORDER BY total_revenue_at_risk DESC"
+      ]
+    },
+    {
+      "name": "ds_segment_risk_clv",
+      "displayName": "Segment x Risk x CLV",
+      "queryLines": [
+        "SELECT\n",
+        "    segment_name,\n",
+        "    risk_tier,\n",
+        "    clv_tier,\n",
+        "    COUNT(*) AS customers,\n",
+        "    ROUND(AVG(churn_probability), 3) AS avg_churn_prob,\n",
+        "    ROUND(AVG(predicted_clv_90d), 2) AS avg_clv,\n",
+        "    ROUND(SUM(revenue_at_risk_90d), 2) AS revenue_at_risk,\n",
+        "    ROUND(AVG(monetary), 2) AS avg_historical_spend,\n",
+        "    ROUND(AVG(avg_review_score), 2) AS avg_review_score\n",
+        "FROM ecommerce.gold.vw_customer_360\n",
+        "WHERE segment_name IS NOT NULL AND risk_tier IS NOT NULL AND clv_tier IS NOT NULL\n",
+        "GROUP BY segment_name, risk_tier, clv_tier\n",
+        "ORDER BY segment_name, risk_tier, clv_tier"
+      ]
+    },
+    {
+      "name": "ds_cohort_retention",
+      "displayName": "Cohort Retention Heatmap",
+      "queryLines": [
+        "SELECT\n",
+        "    cohort_month,\n",
+        "    months_since_acquisition,\n",
+        "    cohort_size,\n",
+        "    active_customers,\n",
+        "    retention_rate_pct\n",
+        "FROM ecommerce.gold.vw_cohort_analysis\n",
+        "WHERE cohort_month NOT IN ('2016-09','2016-12','2018-09','2018-10')\n",
+        "  AND months_since_acquisition <= 12\n",
+        "ORDER BY cohort_month, months_since_acquisition"
+      ]
+    },
+    {
+      "name": "8149ff4e",
+      "displayName": "Churn Prediction",
+      "queryLines": [
+        "SELECT\r\n",
+        "    customer_unique_id,\r\n",
+        "    customer_state,\r\n",
+        "    ROUND(churn_probability, 3) AS churn_probability,\r\n",
+        "    risk_tier,\r\n",
+        "    ROUND(predicted_clv_90d, 2) AS predicted_clv_90d,\r\n",
+        "    ROUND(revenue_at_risk_90d, 2) AS revenue_at_risk,\r\n",
+        "    segment_name,\r\n",
+        "    ROUND(monetary, 2) AS historical_spend,\r\n",
+        "    frequency AS total_orders,\r\n",
+        "    churn_prediction_date\r\n",
+        "FROM ecommerce.gold.vw_customer_360\r\n",
+        "ORDER BY revenue_at_risk_90d DESC"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "page_kpis",
+      "displayName": "Business KPIs",
+      "layout": [
+        {
+          "widget": {
+            "name": "w_kpi_total_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "total_customers",
+                      "expression": "`total_customers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Customers"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_customers",
+                  "displayName": "Total Customers"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_kpi_high_churn_risk",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "high_churn_risk",
+                      "expression": "`high_churn_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "High Churn Risk"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "high_churn_risk",
+                  "displayName": "High Churn Risk"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_kpi_high_value_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "high_value_customers",
+                      "expression": "`high_value_customers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "High Value Customers"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "high_value_customers",
+                  "displayName": "High Value Customers"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_kpi_total_clv",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "total_predicted_clv_90d",
+                      "expression": "`total_predicted_clv_90d`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Toal Predicted CLV 90d"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_predicted_clv_90d",
+                  "displayName": "Total CLV 90d (BRL)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_kpi_revenue_at_risk",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "total_revenue_at_risk",
+                      "expression": "`total_revenue_at_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Revenue at Risk"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_revenue_at_risk",
+                  "displayName": "Revenue at Risk (BRL)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_kpi_avg_churn_prob",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "avg_churn_probability",
+                      "expression": "`avg_churn_probability`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "AVG Churn Probability"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_churn_probability",
+                  "displayName": "Avg Churn Probability"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 3,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_revenue_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_clv_by_state",
+                  "fields": [
+                    {
+                      "name": "customer_state",
+                      "expression": "`customer_state`"
+                    },
+                    {
+                      "name": "sum(avg_predicted_clv)",
+                      "expression": "SUM(`avg_predicted_clv`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "CLV by State"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "customer_state",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(avg_predicted_clv)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 7,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_late_delivery_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_monthly_revenue",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "sum(late_delivery_rate_pct)",
+                      "expression": "SUM(`late_delivery_rate_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Trend of late delivery Rate"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(late_delivery_rate_pct)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 7,
+            "y": 6,
+            "width": 5,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_late_by_state",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_segment_risk_clv",
+                  "fields": [
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    },
+                    {
+                      "name": "clv_tier",
+                      "expression": "`clv_tier`"
+                    },
+                    {
+                      "name": "customers",
+                      "expression": "`customers`"
+                    },
+                    {
+                      "name": "avg_churn_prob",
+                      "expression": "`avg_churn_prob`"
+                    },
+                    {
+                      "name": "avg_clv",
+                      "expression": "`avg_clv`"
+                    },
+                    {
+                      "name": "revenue_at_risk",
+                      "expression": "`revenue_at_risk`"
+                    },
+                    {
+                      "name": "avg_historical_spend",
+                      "expression": "`avg_historical_spend`"
+                    },
+                    {
+                      "name": "avg_review_score",
+                      "expression": "`avg_review_score`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Segment x Risk x CLV"
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "segment_name"
+                  },
+                  {
+                    "fieldName": "risk_tier"
+                  },
+                  {
+                    "fieldName": "clv_tier"
+                  },
+                  {
+                    "fieldName": "customers"
+                  },
+                  {
+                    "fieldName": "avg_churn_prob"
+                  },
+                  {
+                    "fieldName": "avg_clv"
+                  },
+                  {
+                    "fieldName": "revenue_at_risk"
+                  },
+                  {
+                    "fieldName": "avg_historical_spend"
+                  },
+                  {
+                    "fieldName": "avg_review_score"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "4a6c4fbe",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_cohort_retention",
+                  "fields": [
+                    {
+                      "name": "cohort_month",
+                      "expression": "`cohort_month`"
+                    },
+                    {
+                      "name": "months_since_acquisition",
+                      "expression": "`months_since_acquisition`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Cohort Retention Heatmap"
+              },
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "cohort_month",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "months_since_acquisition",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "review-trend-1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_review_trend",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "sum(five_star_count)",
+                      "expression": "SUM(`five_star_count`)"
+                    },
+                    {
+                      "name": "sum(one_star_count)",
+                      "expression": "SUM(`one_star_count`)"
+                    },
+                    {
+                      "name": "sum(total_reviews)",
+                      "expression": "SUM(`total_reviews`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Review Trend"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(five_star_count)"
+                    },
+                    {
+                      "fieldName": "sum(one_star_count)"
+                    },
+                    {
+                      "fieldName": "sum(total_reviews)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 25,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "page_churn",
+      "displayName": "Churn Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "w_top_risk_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8149ff4e",
+                  "fields": [
+                    {
+                      "name": "avg(churn_probability)",
+                      "expression": "AVG(`churn_probability`)"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Churn Probability per risk Tier"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "avg(churn_probability)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "risk_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "bb479e51",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_top_risk_customers",
+                  "fields": [
+                    {
+                      "name": "customer_unique_id",
+                      "expression": "`customer_unique_id`"
+                    },
+                    {
+                      "name": "customer_state",
+                      "expression": "`customer_state`"
+                    },
+                    {
+                      "name": "churn_probability",
+                      "expression": "`churn_probability`"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    },
+                    {
+                      "name": "predicted_clv_90d",
+                      "expression": "`predicted_clv_90d`"
+                    },
+                    {
+                      "name": "revenue_at_risk",
+                      "expression": "`revenue_at_risk`"
+                    },
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    },
+                    {
+                      "name": "historical_spend",
+                      "expression": "`historical_spend`"
+                    },
+                    {
+                      "name": "total_orders",
+                      "expression": "`total_orders`"
+                    },
+                    {
+                      "name": "churn_prediction_date",
+                      "expression": "`churn_prediction_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Top High Risk Customers"
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "customer_unique_id"
+                  },
+                  {
+                    "fieldName": "customer_state"
+                  },
+                  {
+                    "fieldName": "churn_probability"
+                  },
+                  {
+                    "fieldName": "risk_tier"
+                  },
+                  {
+                    "fieldName": "predicted_clv_90d"
+                  },
+                  {
+                    "fieldName": "revenue_at_risk"
+                  },
+                  {
+                    "fieldName": "segment_name"
+                  },
+                  {
+                    "fieldName": "historical_spend"
+                  },
+                  {
+                    "fieldName": "total_orders"
+                  },
+                  {
+                    "fieldName": "churn_prediction_date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 15,
+            "height": 12
+          }
+        },
+        {
+          "widget": {
+            "name": "32ff7307",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8149ff4e",
+                  "fields": [
+                    {
+                      "name": "avg(historical_spend)",
+                      "expression": "AVG(`historical_spend`)"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Average Historical Spend per Risk Tier"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "avg(historical_spend)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "risk_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "edf94a54",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8149ff4e",
+                  "fields": [
+                    {
+                      "name": "sum(revenue_at_risk)",
+                      "expression": "SUM(`revenue_at_risk`)"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Revenue at Risk"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(revenue_at_risk)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "risk_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "page_clv",
+      "displayName": "CLV Analysis",
+      "layout": [
+        {
+          "widget": {
+            "name": "w_clv_churn_matrix",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_clv_churn_matrix",
+                  "fields": [
+                    {
+                      "name": "clv_tier",
+                      "expression": "`clv_tier`"
+                    },
+                    {
+                      "name": "total_clv",
+                      "expression": "`total_clv`"
+                    },
+                    {
+                      "name": "revenue_at_risk",
+                      "expression": "`revenue_at_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "CLV vs Hurn Risk Matrix"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "clv_tier",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "total_clv"
+                    },
+                    {
+                      "fieldName": "revenue_at_risk"
+                    }
+                  ],
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_top_clv_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_top_clv_customers",
+                  "fields": [
+                    {
+                      "name": "customer_unique_id",
+                      "expression": "`customer_unique_id`"
+                    },
+                    {
+                      "name": "customer_state",
+                      "expression": "`customer_state`"
+                    },
+                    {
+                      "name": "predicted_clv_90d",
+                      "expression": "`predicted_clv_90d`"
+                    },
+                    {
+                      "name": "clv_tier",
+                      "expression": "`clv_tier`"
+                    },
+                    {
+                      "name": "historical_spend",
+                      "expression": "`historical_spend`"
+                    },
+                    {
+                      "name": "total_orders",
+                      "expression": "`total_orders`"
+                    },
+                    {
+                      "name": "churn_probability",
+                      "expression": "`churn_probability`"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    },
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    },
+                    {
+                      "name": "revenue_at_risk",
+                      "expression": "`revenue_at_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Top CLV Customers"
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "customer_unique_id"
+                  },
+                  {
+                    "fieldName": "customer_state"
+                  },
+                  {
+                    "fieldName": "predicted_clv_90d"
+                  },
+                  {
+                    "fieldName": "clv_tier"
+                  },
+                  {
+                    "fieldName": "historical_spend"
+                  },
+                  {
+                    "fieldName": "total_orders"
+                  },
+                  {
+                    "fieldName": "churn_probability"
+                  },
+                  {
+                    "fieldName": "risk_tier"
+                  },
+                  {
+                    "fieldName": "segment_name"
+                  },
+                  {
+                    "fieldName": "revenue_at_risk"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "page_segments",
+      "displayName": "Customer Segments",
+      "layout": [
+        {
+          "widget": {
+            "name": "w_segment_feature_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_segment_feature_radar",
+                  "fields": [
+                    {
+                      "name": "avg_churn_probability",
+                      "expression": "`avg_churn_probability`"
+                    },
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Customer Segment Profile"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "avg_churn_probability",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "segment_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "w_segment_clv_cross",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_segment_clv_cross",
+                  "fields": [
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    },
+                    {
+                      "name": "avg(customer_count)",
+                      "expression": "AVG(`customer_count`)"
+                    },
+                    {
+                      "name": "avg(total_clv)",
+                      "expression": "AVG(`total_clv`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "frame": {
+                "showTitle": true,
+                "title": "Segment Average for customer CLV "
+              },
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "segment_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "avg(customer_count)"
+                      }
+                    ]
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "avg(total_clv)"
+                      }
+                    ]
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 12,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "w_segment_state",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_segment_feature_radar",
+                  "fields": [
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    },
+                    {
+                      "name": "sum(avg_order_value)",
+                      "expression": "SUM(`avg_order_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Order Value per Segment"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "segment_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(avg_order_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 8,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "page_c360",
+      "displayName": "Customer 360",
+      "layout": [
+        {
+          "widget": {
+            "name": "w_c360_total_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "total_customers",
+                      "expression": "`total_customers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Customer"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_customers",
+                  "displayName": "Total Customers"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_c360_high_churn",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "high_churn_risk",
+                      "expression": "`high_churn_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total High Churn Risk Count"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "high_churn_risk",
+                  "displayName": "High Churn Risk"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_c360_high_value",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "high_value_customers",
+                      "expression": "`high_value_customers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total High Value Customers"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "high_value_customers",
+                  "displayName": "High Value Customers"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_c360_total_clv",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "total_predicted_clv_90d",
+                      "expression": "`total_predicted_clv_90d`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Predicted CLV 90d"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_predicted_clv_90d",
+                  "displayName": "Total CLV 90d (BRL)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_c360_revenue_at_risk",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "total_revenue_at_risk",
+                      "expression": "`total_revenue_at_risk`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Revenue at Risk"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_revenue_at_risk",
+                  "displayName": "Revenue at Risk (BRL)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_c360_avg_churn",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_c360_kpis",
+                  "fields": [
+                    {
+                      "name": "avg_churn_probability",
+                      "expression": "`avg_churn_probability`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Churn Probability"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_churn_probability",
+                  "displayName": "Avg Churn Probability"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 3,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "w_action_cohorts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_action_cohorts",
+                  "fields": [
+                    {
+                      "name": "action_priority",
+                      "expression": "`action_priority`"
+                    },
+                    {
+                      "name": "customer_count",
+                      "expression": "`customer_count`"
+                    },
+                    {
+                      "name": "total_clv_at_stake",
+                      "expression": "`total_clv_at_stake`"
+                    },
+                    {
+                      "name": "total_revenue_at_risk",
+                      "expression": "`total_revenue_at_risk`"
+                    },
+                    {
+                      "name": "avg_churn_prob",
+                      "expression": "`avg_churn_prob`"
+                    },
+                    {
+                      "name": "avg_clv",
+                      "expression": "`avg_clv`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Actionable Priority Cohorts"
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "action_priority"
+                  },
+                  {
+                    "fieldName": "customer_count"
+                  },
+                  {
+                    "fieldName": "total_clv_at_stake"
+                  },
+                  {
+                    "fieldName": "total_revenue_at_risk"
+                  },
+                  {
+                    "fieldName": "avg_churn_prob"
+                  },
+                  {
+                    "fieldName": "avg_clv"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "w_segment_risk_clv",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_segment_risk_clv",
+                  "fields": [
+                    {
+                      "name": "segment_name",
+                      "expression": "`segment_name`"
+                    },
+                    {
+                      "name": "risk_tier",
+                      "expression": "`risk_tier`"
+                    },
+                    {
+                      "name": "clv_tier",
+                      "expression": "`clv_tier`"
+                    },
+                    {
+                      "name": "customers",
+                      "expression": "`customers`"
+                    },
+                    {
+                      "name": "avg_churn_prob",
+                      "expression": "`avg_churn_prob`"
+                    },
+                    {
+                      "name": "avg_clv",
+                      "expression": "`avg_clv`"
+                    },
+                    {
+                      "name": "revenue_at_risk",
+                      "expression": "`revenue_at_risk`"
+                    },
+                    {
+                      "name": "avg_historical_spend",
+                      "expression": "`avg_historical_spend`"
+                    },
+                    {
+                      "name": "avg_review_score",
+                      "expression": "`avg_review_score`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Segment x Risk x CLV"
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "segment_name"
+                  },
+                  {
+                    "fieldName": "risk_tier"
+                  },
+                  {
+                    "fieldName": "clv_tier"
+                  },
+                  {
+                    "fieldName": "customers"
+                  },
+                  {
+                    "fieldName": "avg_churn_prob"
+                  },
+                  {
+                    "fieldName": "avg_clv"
+                  },
+                  {
+                    "fieldName": "revenue_at_risk"
+                  },
+                  {
+                    "fieldName": "avg_historical_spend"
+                  },
+                  {
+                    "fieldName": "avg_review_score"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "025a171b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_churn_by_rfm",
+                  "fields": [
+                    {
+                      "name": "rfm_segment",
+                      "expression": "`rfm_segment`"
+                    },
+                    {
+                      "name": "sum(predicted_churned)",
+                      "expression": "SUM(`predicted_churned`)"
+                    },
+                    {
+                      "name": "sum(total_customers)",
+                      "expression": "SUM(`total_customers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Cohort Retention Heatmap"
+              },
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "rfm_segment",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "fields": [
+                    {
+                      "fieldName": "sum(predicted_churned)"
+                    },
+                    {
+                      "fieldName": "sum(total_customers)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
