@@ -2,6 +2,8 @@
 
 > A production-grade data engineering and machine learning platform built on **Databricks**, using the **Olist Brazilian E-Commerce** dataset from Kaggle. The platform ingests raw transactional data, transforms it through a Medallion Architecture, engineers features, trains multiple ML models, and serves predictions through automated batch inference pipelines — all orchestrated end-to-end on Databricks.
 
+Project Details and Demo - https://drive.google.com/drive/folders/1SAuwZTF2_U6YHkhHXKmlrnEw2fJmcIqu?usp=drive_link
+
 ---
 
 ## Table of Contents
